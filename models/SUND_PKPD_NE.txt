@@ -1,0 +1,64 @@
+########## NAME
+SUND_PKPD_NE
+
+########## METADATA
+time_unit = m
+
+########## MACROS
+
+########## STATES
+ddt_C1 = (Q21*C2 - (Q12+CL_e1+Q13)*C1 + k0) / V1
+ddt_C2 = (Q12*C1 - Q21*C2) / V2
+ddt_C3 = (Q13*C1/f_dop - CL_e3*C3/f_dop) / V3
+ddt_Cdop = f_dop*(IDA_endogenous + k3dop*C3) - f_dop*(Vmax*Cdop/(km + Cdop)) - (1/f_dop)*krem*Cdop
+ddt_Cne = f_ne*(kdb*(1 - Cne/(IC50+Cne))*Cdop*(1 - Cne^hill_n/(Cne^hill_n + IC50_autoinh^hill_n))) - (1/f_ne)*krene*Cne
+
+C1(0) = 0
+C2(0) = 0
+C3(0) = 0
+Cdop(0) = 0 // Cdop0 // to be calculated using fsolve externally
+Cne(0) = 0 // Cne0    // = Cne_base * f_ne externally
+
+########## PARAMETERS
+IDA_endogenous = 0.5
+k3dop = 5.0
+Vmax = 4.0
+km = 0.16
+krem = 0.04
+Cne_base = 0.002
+kdb = 0.05
+krene = 0.04
+IC50 = 0.0115
+IC50_autoinh = 0.28
+hill_n = 1.5
+Q12 = 9.11
+Q21 = 10.0
+Q13 = 0.0021
+CL_e1 = 0.50
+CL_e3 = 0.006
+V1 = 12.0
+V2 = 32.0
+V3 = 2.0
+f_dop = 1.0 // set externally per condition
+f_ne = 1.0  // set externally per condition
+
+########## VARIABLES
+// k0 = k0_in @ 0 // infusion function passed externally
+r_dop_reuptake = Vmax*Cdop / (km + Cdop)
+r_ne_autoinh = Cne^hill_n / (Cne^hill_n + IC50_autoinh^hill_n)
+r_ne_kdb_eff = kdb * (1 - Cne / (IC50 + Cne))
+
+########## FUNCTIONS
+
+########## EVENTS
+
+########## OUTPUTS
+DA_out = Cdop
+NE_out = Cne
+
+########## INPUTS
+k0 = k0_in @ 0 // time-dependent levodopa infusion function
+
+########## FEATURES
+DA_feature = Cdop
+NE_feature = Cne
